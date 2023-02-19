@@ -30,7 +30,7 @@ class StrokeOptions {
   final bool isComplete;
 
   StrokeOptions({
-    this.size = 16,
+    this.size = 10,
     this.thinning = 0.7,
     this.smoothing = 0.5,
     this.streamline = 0.5,

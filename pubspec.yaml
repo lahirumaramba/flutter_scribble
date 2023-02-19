@@ -40,6 +40,8 @@ dependencies:
   firebase_app_check: ^0.1.1+11
   cloud_functions: ^4.0.10
   cloud_firestore: ^4.4.2
+  flutter_bloc: ^8.1.2
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:

@@ -1,19 +1,15 @@
-import { onCall, onRequest } from 'firebase-functions/v2/https';
+import { onRequest } from 'firebase-functions/v2/https';
+import * as functions from 'firebase-functions';
 import { getStorage } from 'firebase-admin/storage';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { randomUUID } from 'crypto';
-import { defineSecret } from 'firebase-functions/params';
-
-const replicateAPIKey = defineSecret('REPLICATE_API_TOKEN');
-const webHookUrl = defineSecret('REPLICATE_WEB_HOOK');
 
 initializeApp();
 
 exports.replicatehook = onRequest(
   { timeoutSeconds: 20, cors: true },
   async (req, res) => {
-    console.log('webhook', req.body);
     if (req.method !== 'POST') {
       res.status(403).send('Forbidden!');
       return;
@@ -36,18 +32,20 @@ exports.replicatehook = onRequest(
         .update(prediction);
     } catch (err) {
       res.status(500).send(err);
+      return;
     }
 
     const status = prediction.status;
     if (status in ['succeeded', 'failed'] === false) {
       if (status === 'succeeded') {
+        const outputImageUrl = prediction?.output[1];
+        console.log('outputImageUrl', outputImageUrl);
         try {
-          await getFirestore()
-            .collection('results')
-            .doc(prediction.id)
-            .update({ output: prediction.output });
+          await processOutputImage(outputImageUrl, prediction.id);
         } catch (err) {
+          console.log(err);
           res.status(200).send('Ok');
+          return;
         }
       }
       // if (status === 'failed') cleanup
@@ -57,26 +55,34 @@ exports.replicatehook = onRequest(
   }
 );
 
-exports.createprediction = onCall(
-  {
-    timeoutSeconds: 20,
-    secrets: [replicateAPIKey, webHookUrl],
-    cors: ['localhost'],
-  },
-  async (request: any) => {
-    const imageData = request.data.image;
-    const prompt = request.data.prompt;
+async function processOutputImage(url: string, id: string): Promise<void> {
+  const response = await fetch(url);
+  const imageData = Buffer.from(await response.arrayBuffer());
+  const imageUrl = await uploadImageBuffer(imageData);
 
-    const apiKey = replicateAPIKey.value();
-    const webhook = webHookUrl.value();
+  await getFirestore()
+    .collection('results')
+    .doc(id)
+    .update({ output: imageUrl });
+}
+
+exports.createPrediction = functions
+  .runWith({
+    secrets: ['REPLICATE_API_TOKEN', 'REPLICATE_WEB_HOOK'],
+    timeoutSeconds: 20,
+  })
+  .https.onCall(async (data: any, context: any) => {
+    const imageData = data.image;
+    const prompt = data.prompt;
+
+    const apiKey = process.env.REPLICATE_API_TOKEN ?? '';
+    const webhook = process.env.REPLICATE_WEB_HOOK ?? '';
 
     let prediction;
 
     try {
       const imageUrl = await uploadImage(imageData);
-      console.log('imageUrl', imageUrl);
       prediction = await predict(prompt, imageUrl, apiKey, webhook);
-      console.log('prediction', prediction.id);
 
       await getFirestore()
         .collection('predictions')
@@ -85,15 +91,13 @@ exports.createprediction = onCall(
       await getFirestore()
         .collection('results')
         .doc(prediction.id)
-        .set({ input: imageUrl, output: null });
+        .set({ input: imageUrl, output: null, prompt });
     } catch (error) {
-      console.log(error);
       return { error };
     }
 
     return { data: prediction.id };
-  }
-);
+  });
 
 /**
  * Create a replicate prediction
@@ -118,8 +122,9 @@ async function predict(
     body: JSON.stringify({
       version:
         '435061a1b5a4c1e26740464bf786efdfa9cb3a3ac488595a2de23e143fdb0117',
-      input: { prompt, imageUrl },
+      input: { prompt, image: imageUrl },
       webhook,
+      webhook_events_filter: ['start', 'completed'],
     }),
   });
 
@@ -137,22 +142,25 @@ async function predict(
  * @return {Promise<string>} Image URL
  */
 async function uploadImage(imageBytes64Str: string): Promise<string> {
-  const bucket = getStorage().bucket();
   const imageBuffer = Buffer.from(imageBytes64Str, 'base64');
   const imageByteArray = new Uint8Array(imageBuffer);
+  return await uploadImageBuffer(Buffer.from(imageByteArray));
+}
+
+async function uploadImageBuffer(buffer: Buffer): Promise<string> {
+  const bucket = getStorage().bucket();
   const fileName = randomUUID();
   const file = bucket.file(`images/${fileName}.png`);
   const options = { resumable: false, metadata: { contentType: 'image/png' } };
 
   // options may not be necessary
   try {
-    await file.save(Buffer.from(imageByteArray), options);
+    await file.save(buffer, options);
     const urls = await file.getSignedUrl({
       action: 'read',
       expires: '03-09-2500',
     });
     const url = urls[0];
-    console.log(`Image url = ${url}`);
     return url;
   } catch (err) {
     throw Error(`Unable to upload image ${err}`);

@@ -11,10 +11,19 @@ import "stroke.dart";
 import 'stroke_options.dart';
 
 class DrawingPage extends StatefulWidget {
-  const DrawingPage({Key? key}) : super(key: key);
+  final Function({bool drawing}) callback;
+  final bool shouldPredict;
+  final String promptText;
+
+  const DrawingPage(
+      {Key? key,
+      required this.callback,
+      required this.shouldPredict,
+      required this.promptText})
+      : super(key: key);
 
   @override
-  _DrawingPageState createState() => _DrawingPageState();
+  State<DrawingPage> createState() => _DrawingPageState();
 }
 
 class _DrawingPageState extends State<DrawingPage> {
@@ -87,8 +96,8 @@ class _DrawingPageState extends State<DrawingPage> {
       final pngBytes = futureBytes!.buffer.asUint8List();
 
       final result = await FirebaseFunctions.instance
-          .httpsCallable('createprediction')
-          .call({'image': base64Encode(pngBytes), 'prompt': 'apple'});
+          .httpsCallable('createPrediction')
+          .call({'image': base64Encode(pngBytes), 'prompt': widget.promptText});
       print(result.data);
     } on FirebaseFunctionsException catch (error) {
       print(error);
@@ -109,6 +118,7 @@ class _DrawingPageState extends State<DrawingPage> {
   }
 
   void onPointerDown(PointerDownEvent details) {
+    widget.callback(drawing: true); // set drawing state to true
     options = StrokeOptions(
       simulatePressure: details.kind != ui.PointerDeviceKind.stylus,
     );
@@ -153,6 +163,15 @@ class _DrawingPageState extends State<DrawingPage> {
   void onPointerUp(PointerUpEvent details) {
     lines = List.from(lines)..add(line!);
     linesStreamController.add(lines);
+    widget.callback(drawing: false); // reset drawing state
+  }
+
+  @override
+  void didUpdateWidget(covariant DrawingPage oldWidget) {
+    if (!oldWidget.shouldPredict && widget.shouldPredict) {
+      upload();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   Widget buildCurrentPath(BuildContext context) {
@@ -203,134 +222,44 @@ class _DrawingPageState extends State<DrawingPage> {
 
   Widget buildToolbar() {
     return Positioned(
-        top: 40.0,
-        right: 10.0,
+        bottom: 10.0,
+        left: 10.0,
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const Text(
-                'Size',
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              ),
-              Slider(
-                  value: options.size,
-                  min: 1,
-                  max: 50,
-                  divisions: 100,
-                  label: options.size.round().toString(),
-                  onChanged: (double value) => {
-                        setState(() {
-                          options.size = value;
-                        })
-                      }),
-              const Text(
-                'Thinning',
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              ),
-              Slider(
-                  value: options.thinning,
-                  min: -1,
-                  max: 1,
-                  divisions: 100,
-                  label: options.thinning.toStringAsFixed(2),
-                  onChanged: (double value) => {
-                        setState(() {
-                          options.thinning = value;
-                        })
-                      }),
-              const Text(
-                'Streamline',
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              ),
-              Slider(
-                  value: options.streamline,
-                  min: 0,
-                  max: 1,
-                  divisions: 100,
-                  label: options.streamline.toStringAsFixed(2),
-                  onChanged: (double value) => {
-                        setState(() {
-                          options.streamline = value;
-                        })
-                      }),
-              const Text(
-                'Smoothing',
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              ),
-              Slider(
-                  value: options.smoothing,
-                  min: 0,
-                  max: 1,
-                  divisions: 100,
-                  label: options.smoothing.toStringAsFixed(2),
-                  onChanged: (double value) => {
-                        setState(() {
-                          options.smoothing = value;
-                        })
-                      }),
-              const Text(
-                'Taper Start',
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              ),
-              Slider(
-                  value: options.taperStart,
-                  min: 0,
-                  max: 100,
-                  divisions: 100,
-                  label: options.taperStart.toStringAsFixed(2),
-                  onChanged: (double value) => {
-                        setState(() {
-                          options.taperStart = value;
-                        })
-                      }),
-              const Text(
-                'Taper End',
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              ),
-              Slider(
-                  value: options.taperEnd,
-                  min: 0,
-                  max: 100,
-                  divisions: 100,
-                  label: options.taperEnd.toStringAsFixed(2),
-                  onChanged: (double value) => {
-                        setState(() {
-                          options.taperEnd = value;
-                        })
-                      }),
-              const Text(
-                'Clear',
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              ),
               buildClearButton(context),
+              buildUndoButton(context),
             ]));
   }
 
-  Widget buildClearButton(BuildContext context) {
+  Widget buildUndoButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        upload();
+        image(context);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: const CircleAvatar(
             child: Icon(
           Icons.replay,
+          size: 20.0,
+          color: Colors.white,
+        )),
+      ),
+    );
+  }
+
+  Widget buildClearButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        clear();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: const CircleAvatar(
+            child: Icon(
+          Icons.clear_outlined,
           size: 20.0,
           color: Colors.white,
         )),

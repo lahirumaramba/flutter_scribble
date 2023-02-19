@@ -27,5 +27,17 @@ module.exports = {
     indent: ['error', 2],
     'object-curly-spacing': ['error', 'always'],
     'quote-props': ['error', 'as-needed'],
+    'require-jsdoc': [
+      'error',
+      {
+        require: {
+          FunctionDeclaration: false,
+          MethodDefinition: false,
+          ClassDeclaration: false,
+          ArrowFunctionExpression: false,
+          FunctionExpression: false,
+        },
+      },
+    ],
   },
 };

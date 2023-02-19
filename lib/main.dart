@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_scribble/home/home_page.dart';
+import 'package:flutter_scribble/ui/home/home_page.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -33,11 +33,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Scribble',
+      title: '🐦🖼️ Flutter Scribble',
       theme: ThemeData(
-        primarySwatch: Colors.amber,
+        primaryColorDark: Colors.blueGrey,
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: const Color.fromRGBO(48, 49, 52, 1),
       ),
-      home: const HomePage(title: 'Scribble Diffusion with Flutter'),
+      home: const HomePage(title: '🖼️ Scribble Diffusion with Flutter 🐦'),
     );
   }
 }
