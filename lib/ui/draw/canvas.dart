@@ -51,8 +51,6 @@ class Paper extends CustomPainter {
       final rect = Rect.fromLTWH(0, 0, size.width, size.height);
       canvas.clipRect(rect);
 
-      canvas.drawColor(Colors.white, BlendMode.multiply);
-
       canvas.drawPath(path, paint);
     }
   }

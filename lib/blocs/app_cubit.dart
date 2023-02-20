@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_scribble/blocs/app_states.dart';
 import 'package:flutter_scribble/models/prediction_model.dart';
@@ -16,6 +17,7 @@ class AppCubit extends Cubit<PredictionState> {
 
   void init() {
     emit(InitialState());
+    _backendService.logEvent('screen_view', {'screen_name': 'create_page'});
   }
 
   Future<void> listenToPrediction(String id) async {
@@ -29,6 +31,7 @@ class AppCubit extends Cubit<PredictionState> {
   Future<void> createPrediction(String imageData, String prompt) async {
     final pid = await _backendService.createPrediction(imageData, prompt);
     pid == null ? emit(PredictionStopped()) : emit(PredictionStarted(pid));
+    _backendService.logEvent('create_prediction', {'prompt': prompt});
   }
 
   void startPrediction(String prompt) {

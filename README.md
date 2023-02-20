@@ -1,16 +1,23 @@
-# flutter_scribble
+# Flutter Scribble Diffusion
 
-A new Flutter project.
+Turn your scribbles into detailed images with AI.
 
-## Getting Started
+## Powered by
 
-This project is a starting point for a Flutter application.
+🚀 [Replicate](https://replicate.com/?utm_source=project&utm_campaign=scribblediffusion), a platform for running machine learning models in the cloud.
 
-A few resources to get you started if this is your first Flutter project:
+🖍️ [ControlNet](https://replicate.com/jagilley/controlnet-scribble?utm_source=project&utm_campaign=scribblediffusion), an open-source machine learning model that generates images from text and scribbles.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+🐦 [Flutter](https://flutter.dev/), an open source framework by Google for building beautiful, natively compiled, multi-platform applications from a single codebase.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+🔥 [Firebase](https://firebase.google.com/), an app development platform that helps you build and grow apps and games users love.
+
+🔥 ⚡ [Cloud Functions for Firebase](https://firebase.google.com/docs/functions), for talking to the Replicate API.
+
+🔥 📝 [Cloud Firestore](https://firebase.google.com/products/firestore), for storing predictions from Replicate.
+
+🔥 ☁️ [Cloud Storage](https://firebase.google.com/products/storage), for saving generated images from Replicate.
+
+--
+
+Inspired by [Scribble Diffusion](https://github.com/replicate/scribble-diffusion)

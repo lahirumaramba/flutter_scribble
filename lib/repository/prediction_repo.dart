@@ -4,17 +4,18 @@ import 'package:flutter_scribble/models/prediction_model.dart';
 
 abstract class PredictionRepository {
   Stream<PredictionModel> onPredictionUpdated(String id);
-  Future<List<PredictionModel>> get predictions;
+  Future<List<PredictionModel>> get showcase;
 }
 
 class PredictionRepositoryImpl extends PredictionRepository {
   final _predictionsRef = FirebaseFirestore.instance.collection('results');
+  final _showcaseRef = FirebaseFirestore.instance.collection('showcase');
 
   @override
-  Future<List<PredictionModel>> get predictions async {
+  Future<List<PredictionModel>> get showcase async {
     List<PredictionModel> resultsList = [];
     try {
-      final predictions = await _predictionsRef.limit(3).get();
+      final predictions = await _showcaseRef.limit(3).get();
       for (var element in predictions.docs) {
         resultsList.add(PredictionModel.fromMap(element.data()));
       }

@@ -60,7 +60,8 @@ class _HomeListState extends State<HomeList> {
   final PredictionRepository _predictionRepository = GetIt.instance();
   final List<PredictionModel> _results = [];
 
-  final _promptController = TextEditingController(text: 'A glass shaped heart');
+  final _promptController =
+      TextEditingController(text: 'a futuristic spaceship in the galaxy');
 
   @override
   void initState() {
@@ -69,7 +70,7 @@ class _HomeListState extends State<HomeList> {
   }
 
   Future<void> _getRecentResults() async {
-    final results = await _predictionRepository.predictions;
+    final results = await _predictionRepository.showcase;
     setState(() {
       _results.addAll(results);
     });
@@ -131,6 +132,7 @@ class _HomeListState extends State<HomeList> {
             child: Text(
               'Turn your scribble to an image with AI',
               style: TextStyle(color: Colors.grey, fontSize: 25.0),
+              textAlign: TextAlign.center,
             ),
           )),
           const Align(
@@ -224,7 +226,7 @@ class _HomeListState extends State<HomeList> {
                       onOpen: _launchUrl,
                       style: const TextStyle(color: Colors.grey),
                       text:
-                          'Powered by ControlNet, Replicate, Flutter, and Firebase. 💬 http://twitter.com/lahiru',
+                          'Powered by ControlNet, Replicate, Flutter, and Firebase. 💬 https://twitter.com/lahiru. Inspired by https://scribblediffusion.com',
                     ),
                   ),
                 ),
@@ -262,11 +264,14 @@ class _HomeListState extends State<HomeList> {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20.0, 20.0, 8.0, 20.0),
-                      child: FadeInImage.assetNetwork(
-                          fit: BoxFit.contain,
-                          placeholder: circularProgressIndicatorSmall,
-                          image: prediction.inputImageUrl,
-                          placeholderScale: 5),
+                      child: Container(
+                        color: const Color.fromARGB(200, 255, 255, 255),
+                        child: FadeInImage.assetNetwork(
+                            fit: BoxFit.contain,
+                            placeholder: circularProgressIndicatorSmall,
+                            image: prediction.inputImageUrl,
+                            placeholderScale: 5),
+                      ),
                     ),
                   ),
                   Expanded(

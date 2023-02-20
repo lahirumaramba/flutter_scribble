@@ -23,7 +23,18 @@ class DrawingPage extends StatefulWidget {
 }
 
 class _DrawingPageState extends State<DrawingPage> {
-  List<Stroke> lines = <Stroke>[];
+  List<Stroke> lines = <Stroke>[
+    const Stroke(
+      [
+        Point(100, 100),
+        Point(300, 300),
+        Point(400, 300),
+        Point(300, 20),
+        Point(30, 20),
+        Point(60, 150),
+      ],
+    )
+  ];
 
   Stroke? line;
 
