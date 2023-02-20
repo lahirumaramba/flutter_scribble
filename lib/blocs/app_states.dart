@@ -10,7 +10,21 @@ abstract class PredictionState extends Equatable {
 
 class InitialState extends PredictionState {}
 
-class PredictionStarted extends PredictionState {}
+class PredictionTriggered extends PredictionState {
+  final String prompt;
+  const PredictionTriggered(this.prompt);
+
+  @override
+  List<Object> get props => [prompt];
+}
+
+class PredictionStarted extends PredictionState {
+  final String id;
+  const PredictionStarted(this.id);
+
+  @override
+  List<Object> get props => [id];
+}
 
 class PredictionUpdated extends PredictionState {
   final PredictionModel data;
@@ -19,6 +33,8 @@ class PredictionUpdated extends PredictionState {
   @override
   List<Object> get props => [data];
 }
+
+class PredictionStopped extends PredictionState {}
 
 class PredictionCompleted extends PredictionState {}
 

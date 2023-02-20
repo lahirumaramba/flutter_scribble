@@ -11,7 +11,7 @@ class GetPredictions extends PredictionEvent {
   const GetPredictions();
 }
 
-class CreatePrediction extends PredictionEvent {}
+class StartPrediction extends PredictionEvent {}
 
 class EndPrediction extends PredictionEvent {}
 

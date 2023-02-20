@@ -2,8 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 
-import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_scribble/blocs/app_cubit.dart';
+import 'package:flutter_scribble/blocs/app_states.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 
 import "canvas.dart";
@@ -12,15 +15,8 @@ import 'stroke_options.dart';
 
 class DrawingPage extends StatefulWidget {
   final Function({bool drawing}) callback;
-  final bool shouldPredict;
-  final String promptText;
 
-  const DrawingPage(
-      {Key? key,
-      required this.callback,
-      required this.shouldPredict,
-      required this.promptText})
-      : super(key: key);
+  const DrawingPage({Key? key, required this.callback}) : super(key: key);
 
   @override
   State<DrawingPage> createState() => _DrawingPageState();
@@ -88,20 +84,13 @@ class _DrawingPageState extends State<DrawingPage> {
     );
   }
 
-  Future<void> upload() async {
-    try {
-      final image = await toImage();
-      final futureBytes =
-          await image.toByteData(format: ui.ImageByteFormat.png);
-      final pngBytes = futureBytes!.buffer.asUint8List();
+  Future<void> upload(cubit, prompt) async {
+    final image = await toImage();
+    final futureBytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    final pngBytes = futureBytes!.buffer.asUint8List();
+    final imageData = base64Encode(pngBytes);
 
-      final result = await FirebaseFunctions.instance
-          .httpsCallable('createPrediction')
-          .call({'image': base64Encode(pngBytes), 'prompt': widget.promptText});
-      print(result.data);
-    } on FirebaseFunctionsException catch (error) {
-      print(error);
-    }
+    await cubit.createPrediction(imageData, prompt);
   }
 
   Future<ui.Image> toImage() async {
@@ -166,14 +155,6 @@ class _DrawingPageState extends State<DrawingPage> {
     widget.callback(drawing: false); // reset drawing state
   }
 
-  @override
-  void didUpdateWidget(covariant DrawingPage oldWidget) {
-    if (!oldWidget.shouldPredict && widget.shouldPredict) {
-      upload();
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
   Widget buildCurrentPath(BuildContext context) {
     return Listener(
       onPointerDown: onPointerDown,
@@ -236,7 +217,7 @@ class _DrawingPageState extends State<DrawingPage> {
   Widget buildUndoButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        image(context);
+        undo();
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -269,14 +250,24 @@ class _DrawingPageState extends State<DrawingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          buildAllPaths(context),
-          buildCurrentPath(context),
-          buildToolbar()
-        ],
+    return BlocListener<AppCubit, PredictionState>(
+      listener: (context, state) async {
+        if (state is PredictionTriggered) {
+          if (kDebugMode) {
+            print('PredictionTriggered');
+          }
+          await upload(context.read<AppCubit>(), state.prompt);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            buildAllPaths(context),
+            buildCurrentPath(context),
+            buildToolbar()
+          ],
+        ),
       ),
     );
   }

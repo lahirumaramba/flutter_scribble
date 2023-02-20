@@ -42,6 +42,9 @@ dependencies:
   cloud_firestore: ^4.4.2
   flutter_bloc: ^8.1.2
   equatable: ^2.0.5
+  get_it: ^7.2.0
+  loading_gifs: ^0.3.0
+  collection: ^1.17.0
 
 dev_dependencies:
   flutter_test:

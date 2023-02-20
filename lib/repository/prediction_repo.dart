@@ -2,10 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_scribble/models/prediction_model.dart';
 
-class PredictionRepository {
+abstract class PredictionRepository {
+  Stream<PredictionModel> onPredictionUpdated(String id);
+  Future<List<PredictionModel>> get predictions;
+}
+
+class PredictionRepositoryImpl extends PredictionRepository {
   final _predictionsRef = FirebaseFirestore.instance.collection('results');
 
-  Future<List<PredictionModel>> get() async {
+  @override
+  Future<List<PredictionModel>> get predictions async {
     List<PredictionModel> resultsList = [];
     try {
       final predictions = await _predictionsRef.get();
@@ -23,10 +29,12 @@ class PredictionRepository {
     }
   }
 
-  Stream<PredictionModel> prediction(String id) {
+  @override
+  Stream<PredictionModel> onPredictionUpdated(String id) {
     return _predictionsRef.doc(id).snapshots().map((snapshot) {
-      final data = snapshot.data();
-      return PredictionModel.fromMap(data ?? {});
+      final data = snapshot.data() ?? {};
+      data['id'] = id;
+      return PredictionModel.fromMap(data);
     });
   }
 }
