@@ -35,7 +35,7 @@ void main() async {
 
   runApp(
     BlocProvider(
-      create: (_) => AppCubit(),
+      create: (_) => AppCubit()..init(),
       child: const MyApp(),
     ),
   );
@@ -58,10 +58,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColorDark: Colors.blueGrey,
         brightness: Brightness.dark,
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: const Color.fromRGBO(48, 49, 52, 1),
+        primarySwatch: Colors.indigo,
+        scaffoldBackgroundColor: const Color(0xFF121212),
       ),
-      home: const HomePage(title: '🖼️ Scribble Diffusion with Flutter 🐦'),
+      home: const HomePage(title: 'Scribble Diffusion with Flutter'),
     );
   }
 }

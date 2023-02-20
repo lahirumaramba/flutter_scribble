@@ -2,11 +2,15 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_scribble/blocs/app_cubit.dart';
 import 'package:flutter_scribble/blocs/app_states.dart';
 import 'package:flutter_scribble/models/prediction_model.dart';
+import 'package:flutter_scribble/repository/prediction_repo.dart';
 import 'package:flutter_scribble/ui/draw/drawing_page.dart';
+import 'package:get_it/get_it.dart';
 import 'package:loading_gifs/loading_gifs.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -21,10 +25,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: const Color.fromRGBO(32, 32, 36, 1),
-      ),
+      // appBar: AppBar(
+      //   title: Text(widget.title),
+      //   backgroundColor: const Color.fromRGBO(32, 32, 36, 1),
+      // ),
       body: Center(
         child: BlocListener<AppCubit, PredictionState>(
           listener: (context, state) {
@@ -53,18 +57,23 @@ class _HomeListState extends State<HomeList> {
   bool _isDrawing = false;
   bool _isReadyForPrediction = true;
   bool _isWaitingForInitial = false;
-  final List<PredictionModel> _results = [
-    const PredictionModel(
-      id: 'id',
-      prompt: 'prompt',
-      inputImageUrl:
-          'https://storage.googleapis.com/flutter-scribble.appspot.com/images/f9fe5943-dd71-4216-abce-e09f82edf331.png?GoogleAccessId=flutter-scribble%40appspot.gserviceaccount.com&Expires=16731014400&Signature=UYfzb5qgI%2FzuKmtVUTQmhesNsThFu7UkZNNJoOZRxpUvYiJexLZ6G9CrNyuQ%2BIlYt7FtJd%2FCep7XA6aaFj6s0v9hGUNVhySTzc5oC9XrUNGdoYVNJfuQ%2BxGo1Jk1HzIiLy3ap0%2FxlhpiRO3cuMGXpC4G%2FL2mxKR2OIQ3E5NAU0TS28q0dMJfP1otGmiNl9jDyakpSEvRuOcpuSSOrDYwUVce%2FVuRFQdSrO9mIPpXTRk%2FXT4q2ShWyTE7x%2BPIwdLPW9YLb2UuR%2FMHYU1k3SH86wnuPDfYK605U%2BnLom6fSy2hiZjSEiflkEa2vBlF94URN3ebYnMQWq8b1wtwv8IMzw%3D%3D',
-      outputImageUrl:
-          'https://storage.googleapis.com/flutter-scribble.appspot.com/images/5d5f6c19-3e20-474f-b16d-00eb3a805d9c.png?GoogleAccessId=957935913819-compute%40developer.gserviceaccount.com&Expires=16731014400&Signature=dPW%2BJW6oMwn1JufQZwjsY6ckUhFDot5NdWFKb3C3%2FINEMsC24pawiIZNM%2FTaPFxcgWMdgKPk%2Br9kwqI%2BEyaH7W6mM4kWKe3m6Fzi6RKBh2UlSL9Tb%2F4sqUsTmOaMI4qW2ADIN7ofnOyYj2ekYdrNOiiiHSWWPf4HXInAScAahwWBHvweQch0W2jS%2BEqX8Gx8rlqARyxpn%2FsvCuA6WCd6LsDk%2Bg3CJpFAVYx3jUkCsCvtOug%2Fu7DYhE1OpDZdV11xB5rAe1MShBB%2FFpzsSR1cRd9xZp0XCaOtoPnUHwftZBTiXzd6Vj85nrobb1RIQRt9HFXBGkGC%2FlVA9GVjTFBlwg%3D%3D',
-    )
-  ];
+  final PredictionRepository _predictionRepository = GetIt.instance();
+  final List<PredictionModel> _results = [];
 
   final _promptController = TextEditingController(text: 'A glass shaped heart');
+
+  @override
+  void initState() {
+    _getRecentResults();
+    super.initState();
+  }
+
+  Future<void> _getRecentResults() async {
+    final results = await _predictionRepository.predictions;
+    setState(() {
+      _results.addAll(results);
+    });
+  }
 
   @override
   void dispose() {
@@ -81,7 +90,7 @@ class _HomeListState extends State<HomeList> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AppCubit, PredictionState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is PredictionCompleted) {
           setState(() {
             _isReadyForPrediction = true;
@@ -108,6 +117,30 @@ class _HomeListState extends State<HomeList> {
             : const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(15.0),
         children: <Widget>[
+          const Align(
+              child: Padding(
+            padding: EdgeInsets.only(top: 15.0, bottom: 8.0),
+            child: Text(
+              'Scribble Diffusion',
+              style: TextStyle(fontSize: 40.0),
+            ),
+          )),
+          const Align(
+              child: Padding(
+            padding: EdgeInsets.only(bottom: 10.0),
+            child: Text(
+              'Turn your scribble to an image with AI',
+              style: TextStyle(color: Colors.grey, fontSize: 25.0),
+            ),
+          )),
+          const Align(
+              child: Padding(
+            padding: EdgeInsets.only(bottom: 25.0),
+            child: Text(
+              'Powered by ControlNet, Replicate, Flutter, and Firebase',
+              style: TextStyle(color: Colors.grey),
+            ),
+          )),
           Align(
             child: Container(
               constraints:
@@ -131,7 +164,7 @@ class _HomeListState extends State<HomeList> {
                       controller: _promptController,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        hintText: 'Text Prompt',
+                        hintText: 'Type your prompt here',
                       ),
                     ),
                   ),
@@ -143,6 +176,9 @@ class _HomeListState extends State<HomeList> {
                             minimumSize: const Size.fromHeight(55.0)),
                         onPressed: _isReadyForPrediction
                             ? () {
+                                if (_promptController.text.isEmpty) {
+                                  return;
+                                }
                                 setState(() {
                                   _isReadyForPrediction = false;
                                   _isWaitingForInitial = true;
@@ -176,9 +212,35 @@ class _HomeListState extends State<HomeList> {
           Column(
             children: buildResults(),
           ),
+          Align(
+            child: SizedBox(
+              width: double.infinity,
+              child: Card(
+                color: Colors.transparent,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Linkify(
+                      onOpen: _launchUrl,
+                      style: const TextStyle(color: Colors.grey),
+                      text:
+                          'Powered by ControlNet, Replicate, Flutter, and Firebase. 💬 http://twitter.com/lahiru',
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _launchUrl(LinkableElement linkableElement) async {
+    final link = Uri.parse(linkableElement.url);
+    if (!await launchUrl(link)) {
+      throw Exception('Could not launch $link');
+    }
   }
 
   List<Widget> buildResults() {
@@ -199,7 +261,7 @@ class _HomeListState extends State<HomeList> {
                 children: [
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 20.0, 8.0, 20.0),
+                      padding: const EdgeInsets.fromLTRB(20.0, 20.0, 8.0, 20.0),
                       child: FadeInImage.assetNetwork(
                           fit: BoxFit.contain,
                           placeholder: circularProgressIndicatorSmall,
@@ -209,7 +271,7 @@ class _HomeListState extends State<HomeList> {
                   ),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 20.0, 8.0, 20.0),
+                      padding: const EdgeInsets.fromLTRB(8.0, 20.0, 20.0, 20.0),
                       child: prediction.outputImageUrl.isEmpty
                           ? Image.asset(circularProgressIndicatorSmall)
                           : FadeInImage.assetNetwork(
@@ -223,9 +285,7 @@ class _HomeListState extends State<HomeList> {
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0, left: 10.0),
-                child: Text(
-                  prediction.prompt,
-                ),
+                child: Text(prediction.prompt),
               ),
             ],
           ),

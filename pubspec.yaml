@@ -45,6 +45,8 @@ dependencies:
   get_it: ^7.2.0
   loading_gifs: ^0.3.0
   collection: ^1.17.0
+  flutter_linkify: ^5.0.2
+  url_launcher: ^6.1.9
 
 dev_dependencies:
   flutter_test:

@@ -14,7 +14,7 @@ class PredictionRepositoryImpl extends PredictionRepository {
   Future<List<PredictionModel>> get predictions async {
     List<PredictionModel> resultsList = [];
     try {
-      final predictions = await _predictionsRef.get();
+      final predictions = await _predictionsRef.limit(3).get();
       for (var element in predictions.docs) {
         resultsList.add(PredictionModel.fromMap(element.data()));
       }

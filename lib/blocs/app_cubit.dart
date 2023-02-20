@@ -14,6 +14,10 @@ class AppCubit extends Cubit<PredictionState> {
 
   AppCubit() : super(InitialState());
 
+  void init() {
+    emit(InitialState());
+  }
+
   Future<void> listenToPrediction(String id) async {
     // Subscribe to listen for changes in the prediction state
     _predictionSubscription?.cancel();
