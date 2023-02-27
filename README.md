@@ -2,11 +2,24 @@
 
 Turn your scribbles into detailed images with AI.
 
+Demo: [flutter-scribble.web.app](https://flutter-scribble.web.app)
+
+---
+![Flutter Scribble Diffusion Demo](demo.gif)
+
+## Sample Generations
+
+[![A Futuristic Spaceship](sample_02.png)](https://flutter-scribble.web.app/#/share/whf7xnpqcnb5bj6udndqde7sbq)
+[link](https://flutter-scribble.web.app/#/share/whf7xnpqcnb5bj6udndqde7sbq)
+
+[![An Ancient Map from the LOTRs](sample_01.png)](https://flutter-scribble.web.app/#/share/4e425d3xdbftpgry6c4ta3asqe)
+[link](https://flutter-scribble.web.app/#/share/4e425d3xdbftpgry6c4ta3asqe)
+
 ## Powered by
 
-🚀 [Replicate](https://replicate.com/?utm_source=project&utm_campaign=scribblediffusion), a platform for running machine learning models in the cloud.
+🚀 [Replicate](https://replicate.com/), a platform for running machine learning models in the cloud.
 
-🖍️ [ControlNet](https://replicate.com/jagilley/controlnet-scribble?utm_source=project&utm_campaign=scribblediffusion), an open-source machine learning model that generates images from text and scribbles.
+🖍️ [ControlNet](https://replicate.com/jagilley/controlnet-scribble/), an open-source machine learning model that generates images from text and scribbles.
 
 🐦 [Flutter](https://flutter.dev/), an open source framework by Google for building beautiful, natively compiled, multi-platform applications from a single codebase.
 
@@ -16,8 +29,16 @@ Turn your scribbles into detailed images with AI.
 
 🔥 📝 [Cloud Firestore](https://firebase.google.com/products/firestore), for storing predictions from Replicate.
 
-🔥 ☁️ [Cloud Storage](https://firebase.google.com/products/storage), for saving generated images from Replicate.
+🔥 ☁️ [Cloud Storage for Firebase](https://firebase.google.com/products/storage), for saving generated images from Replicate.
 
---
+🔥 🔐 [Firebase Authentication](https://firebase.google.com/docs/auth), for handling anonymous authentication.
 
-Inspired by [Scribble Diffusion](https://github.com/replicate/scribble-diffusion)
+🖌️ [Perfect Freehand Dart](https://github.com/steveruizok/perfect-freehand-dart), for scribbles in Flutter.
+
+---
+
+![Flow](flow.png)
+
+---
+
+Inspired by [🖍️ Scribble Diffusion](https://github.com/replicate/scribble-diffusion)
