@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_scribble/blocs/app_states.dart';
 import 'package:flutter_scribble/models/prediction_model.dart';

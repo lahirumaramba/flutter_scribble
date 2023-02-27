@@ -46,3 +46,4 @@ app.*.map.json
 /resources
 /lib/firebase_options.dart
 .firebaserc
+.firebase/

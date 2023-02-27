@@ -2,7 +2,7 @@ import { onRequest } from 'firebase-functions/v2/https';
 import * as functions from 'firebase-functions';
 import { getStorage } from 'firebase-admin/storage';
 import { initializeApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { randomUUID } from 'crypto';
 
 initializeApp();
@@ -74,6 +74,7 @@ exports.createPrediction = functions
   .https.onCall(async (data: any, context: any) => {
     const imageData = data.image;
     const prompt = data.prompt;
+    const userId = data.userId;
 
     const apiKey = process.env.REPLICATE_API_TOKEN ?? '';
     const webhook = process.env.REPLICATE_WEB_HOOK ?? '';
@@ -91,7 +92,13 @@ exports.createPrediction = functions
       await getFirestore()
         .collection('results')
         .doc(prediction.id)
-        .set({ input: imageUrl, output: null, prompt });
+        .set({
+          input: imageUrl,
+          output: null,
+          prompt,
+          user: userId,
+          timeStamp: FieldValue.serverTimestamp(),
+        });
     } catch (error) {
       return { error };
     }

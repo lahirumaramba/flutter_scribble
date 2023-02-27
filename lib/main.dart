@@ -10,7 +10,9 @@ import 'package:flutter_scribble/services/backend_service.dart';
 import 'package:flutter_scribble/ui/home/home_page.dart';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_scribble/ui/result/result_page.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 
 final getIt = GetIt.instance;
 
@@ -47,13 +49,30 @@ Future<void> injectDependencies() async {
   getIt.registerLazySingleton<BackendService>(() => BackendServiceImpl());
 }
 
+// GoRouter configuration
+final _router = GoRouter(
+  routes: [
+    GoRoute(
+        path: '/',
+        builder: (context, state) =>
+            const HomePage(title: 'Scribble Diffusion with Flutter'),
+        routes: [
+          GoRoute(
+            path: 'share/:id',
+            builder: (context, state) =>
+                ResultPage(id: state.params['id'] ?? ''),
+          )
+        ]),
+  ],
+);
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: '🐦🖼️ Flutter Scribble',
       theme: ThemeData(
         primaryColorDark: Colors.blueGrey,
@@ -61,7 +80,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.indigo,
         scaffoldBackgroundColor: const Color(0xFF121212),
       ),
-      home: const HomePage(title: 'Scribble Diffusion with Flutter'),
+      routerConfig: _router,
     );
   }
 }

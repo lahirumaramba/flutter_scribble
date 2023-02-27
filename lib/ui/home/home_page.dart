@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,8 +6,10 @@ import 'package:flutter_scribble/blocs/app_cubit.dart';
 import 'package:flutter_scribble/blocs/app_states.dart';
 import 'package:flutter_scribble/models/prediction_model.dart';
 import 'package:flutter_scribble/repository/prediction_repo.dart';
+import 'package:flutter_scribble/services/backend_service.dart';
 import 'package:flutter_scribble/ui/draw/drawing_page.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:loading_gifs/loading_gifs.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -58,6 +59,7 @@ class _HomeListState extends State<HomeList> {
   bool _isReadyForPrediction = true;
   bool _isWaitingForInitial = false;
   final PredictionRepository _predictionRepository = GetIt.instance();
+  final BackendService _backendService = GetIt.instance();
   final List<PredictionModel> _results = [];
 
   final _promptController =
@@ -70,7 +72,9 @@ class _HomeListState extends State<HomeList> {
   }
 
   Future<void> _getRecentResults() async {
-    final results = await _predictionRepository.showcase;
+    final user = await _backendService.signInAnonUser();
+    final results =
+        await _predictionRepository.getShowcase(user?.user?.uid ?? '');
     setState(() {
       _results.addAll(results);
     });
@@ -226,7 +230,7 @@ class _HomeListState extends State<HomeList> {
                       onOpen: _launchUrl,
                       style: const TextStyle(color: Colors.grey),
                       text:
-                          'Powered by ControlNet, Replicate, Flutter, and Firebase. 💬 https://twitter.com/lahiru. Inspired by https://scribblediffusion.com',
+                          'Powered by ControlNet, Replicate, Flutter, and Firebase. Code: https://github.com/lahirumaramba/flutter_scribble. 💬: https://twitter.com/lahiru. Inspired by https://scribblediffusion.com',
                     ),
                   ),
                 ),
@@ -288,9 +292,29 @@ class _HomeListState extends State<HomeList> {
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0, left: 10.0),
-                child: Text(prediction.prompt),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20.0, left: 10.0),
+                    child: TextButton(
+                      style:
+                          TextButton.styleFrom(foregroundColor: Colors.white),
+                      onPressed: () => context.go('/share/${prediction.id}'),
+                      child: const Icon(Icons.link_outlined),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 20.0, left: 10.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          prediction.prompt.toUpperCase(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
