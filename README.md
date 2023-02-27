@@ -9,6 +9,9 @@ Demo: [flutter-scribble.web.app](https://flutter-scribble.web.app)
 
 ## Sample Generations
 
+[![A cute clownfish swimming in the ocean](sample_03.png)](https://flutter-scribble.web.app/#/share/mezhk5rvdzbtrg3lriiufkr7sy)
+[link](https://flutter-scribble.web.app/#/share/mezhk5rvdzbtrg3lriiufkr7sy)
+
 [![A Futuristic Spaceship](sample_02.png)](https://flutter-scribble.web.app/#/share/whf7xnpqcnb5bj6udndqde7sbq)
 [link](https://flutter-scribble.web.app/#/share/whf7xnpqcnb5bj6udndqde7sbq)
 
