@@ -33,7 +33,7 @@ class _DrawingPageState extends State<DrawingPage> {
         Point(30, 20),
         Point(60, 150),
       ],
-    )
+    ),
   ];
 
   Stroke? line;
