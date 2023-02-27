@@ -5,7 +5,7 @@ Turn your scribbles into detailed images with AI.
 Demo: [flutter-scribble.web.app](https://flutter-scribble.web.app)
 
 ---
-![Flutter Scribble Diffusion Demo](demo.gif)
+<img alt='Flutter Scribble Diffusion Demo' src='demo.gif' width=50%>
 
 ## Sample Generations
 
@@ -32,6 +32,8 @@ Demo: [flutter-scribble.web.app](https://flutter-scribble.web.app)
 🔥 ☁️ [Cloud Storage for Firebase](https://firebase.google.com/products/storage), for saving generated images from Replicate.
 
 🔥 🔐 [Firebase Authentication](https://firebase.google.com/docs/auth), for handling anonymous authentication.
+
+🔥 🕸️ [Firebase Hosting](https://firebase.google.com/docs/hosting), for hosting the Flutter web app.
 
 🖌️ [Perfect Freehand Dart](https://github.com/steveruizok/perfect-freehand-dart), for scribbles in Flutter.
 
